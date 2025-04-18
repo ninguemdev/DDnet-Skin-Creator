@@ -59,13 +59,3 @@ http://localhost:3001/
 5. **Real‑time preview** shows the composited in‑game view.  
 6. Click **Download Texture** to save the 512×256 PNG.  
 
----
-
-## 🤝 Contributing
-
-1. Fork this repository  
-2. Create a feature branch (`git checkout -b feature/XYZ`)  
-3. Commit your changes (`git commit -m "Add XYZ"`)  
-4. Push to your branch (`git push origin feature/XYZ`)  
-5. Open a Pull Request  
-

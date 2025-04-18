@@ -1,0 +1,99 @@
+/* Reset and base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: sans-serif;
+  background: #f5f5f5;
+  min-height: 100vh;
+}
+
+header, footer {
+  background: #222;
+  color: #fff;
+  width: 100%;
+  text-align: center;
+  padding: 0.5rem;
+}
+
+main {
+  flex: 1;
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+/* Editor canvas container */
+#editor-container {
+  background: #ddd;
+  padding: 0.5rem;
+}
+
+/* The drawing canvas: internal 192×192, scaled on screen */
+#editor-canvas {
+  width: 512px;
+  height: 512px;
+  image-rendering: pixelated;
+  border: 1px solid #333;
+}
+
+/* Toolbar styling */
+#toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background: #fff;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 0 5px rgba(0,0,0,0.2);
+}
+
+.tool-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.tool-group label,
+.tool-group select,
+.tool-group input,
+.tool-group button {
+  font-size: 0.9rem;
+}
+
+.tool-group button {
+  padding: 0.5rem;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fafafa;
+}
+
+.tool-group button:hover {
+  background: #eee;
+}
+
+/* … seu CSS existente … */
+
+/* Preview container styling */
+#preview-container {
+  background: #eee;
+  padding: 0.5rem;
+  text-align: center;
+}
+#preview-container h2 {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+#preview-canvas {
+  width: 256px;   /* escala um pouco menor que o editor */
+  height: 256px;
+  image-rendering: pixelated;
+  border: 1px solid #333;
+}

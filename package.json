@@ -1,0 +1,24 @@
+{
+  "name": "ddnet-skin-creator",
+  "version": "0.0.1",
+  "description": "A DDnet Skin Creator!",
+  "homepage": "https://github.com/ninguemdev/DDnet-Skin-Creator#readme",
+  "bugs": {
+    "url": "https://github.com/ninguemdev/DDnet-Skin-Creator/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ninguemdev/DDnet-Skin-Creator.git"
+  },
+  "license": "ISC",
+  "author": "NinguemDev",
+  "type": "commonjs",
+  "main": "App.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  },
+  "devDependencies": {}
+}

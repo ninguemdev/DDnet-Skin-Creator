@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DDNet Skin Creator</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+  <header>
+    <h1>DDNet Skin Creator</h1>
+  </header>
+
+  <main>
+    <!-- Drawing area -->
+    <section id="editor-container">
+      <!-- internal resolution 192×192, scaled by CSS -->
+      <canvas id="editor-canvas" width="192" height="192"></canvas>
+    </section>
+
+        <!-- Game Preview -->
+        <section id="preview-container">
+            <h2>Game Preview</h2>
+            <canvas id="preview-canvas" width="192" height="192"></canvas>
+          </section>
+
+    <!-- Toolbar -->
+    <aside id="toolbar">
+      <div class="tool-group">
+        <label for="layer-select">Layer:</label>
+        <select id="layer-select">
+          <option value="body">Body</option>
+          <option value="body-shadow">Body Shadow</option>
+          <option value="hand">Hand</option>
+          <option value="hand-shadow">Hand Shadow</option>
+          <option value="foot">Foot</option>
+          <option value="foot-shadow">Foot Shadow</option>
+          <option value="eye-1">Eye 1</option>
+          <option value="eye-2">Eye 2</option>
+          <option value="eye-3">Eye 3</option>
+          <option value="eye-4">Eye 4</option>
+          <option value="eye-5">Eye 5</option>
+          <option value="eye-6">Eye 6</option>
+        </select>
+      </div>
+
+      <div class="tool-group">
+        <label for="color-picker">Color:</label>
+        <input type="color" id="color-picker" value="#ff0000" />
+      </div>
+
+      <div class="tool-group">
+        <label for="brush-size">Brush Size:</label>
+        <input type="range" id="brush-size" min="1" max="128" value="16" />
+      </div>
+
+      <div class="tool-group">
+        <button id="pen-btn">Pen Tool</button>
+        <button id="eraser-btn">Eraser Tool</button>
+        <button id="undo-btn">Undo</button>
+      </div>
+
+      <div class="tool-group">
+        <button id="template-btn">Toggle Template</button>
+        <button id="toggle-bounds">Toggle Bounds</button>
+        <button id="download-btn">Download Texture</button>
+      </div>
+    </aside>
+  </main>
+
+  <footer>
+    <p>Created for the DDRace Network community</p>
+  </footer>
+
+  <script src="/js/script.js"></script>
+</body>
+</html>

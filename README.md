@@ -29,6 +29,7 @@ Web-based skin editor for DDNet Network. Draw your custom 2D skin, preview it in
 
 # 1. Clone the repo
 git clone https://github.com/YOUR_USER/YOUR_REPO.git
+
 cd YOUR_REPO
 
 # 2. Install dependencies

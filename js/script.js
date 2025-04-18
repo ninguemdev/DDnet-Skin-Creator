@@ -5,13 +5,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const FINAL_WIDTH  = 512;
     const FINAL_HEIGHT = 256;
     const MAX_HISTORY  = 50;
-    const previewCanvas = document.getElementById('preview-canvas');
-    const previewCtx    = previewCanvas.getContext('2d');
-
   
     // Main canvas & context
     const canvas = document.getElementById('editor-canvas');
     const ctx    = canvas.getContext('2d');
+  
+    // Preview canvas & context
+    const previewCanvas = document.getElementById('preview-canvas');
+    const previewCtx    = previewCanvas.getContext('2d');
   
     // State
     let currentTool   = 'pen';
@@ -22,20 +23,20 @@ document.addEventListener('DOMContentLoaded', () => {
     let showBounds    = false;
     let isDrawing     = false;
   
-    // History stack
+    // History stack for undo
     const history = [];
   
-    // Pre‑define bounds for each layer
+    // Bounds for each layer (x, y, w, h)
     const boundsMap = {
       'body':        [  0,   0, 192, 192],
       'body-shadow': [  0,   0, 192, 192],
-      'hand':        [128,  64,  64,  64],
-      'hand-shadow': [128,  64,  64,  64],
-      'foot':        [ 32, 128, 128,  64],
-      'foot-shadow': [ 32, 128, 128,  64]
+      'hand':        [126,  63,  64,  64],
+      'hand-shadow': [126,  63,  64,  64],
+      'foot':        [ 52, 108, 128,  64],
+      'foot-shadow': [ 52, 108, 128,  64]
     };
   
-    // Create off‑screen canvases for each layer
+    // Layer names & off‑screen canvases
     const layerNames = [
       'body','body-shadow',
       'hand','hand-shadow',
@@ -52,22 +53,26 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load template overlay
     const templateImage = new Image();
     templateImage.src = '/assets/template.png';
-    templateImage.onload = redrawCanvas;
+    templateImage.onload = () => {
+      redrawCanvas();
+    };
   
     // UI elements
     const penBtn      = document.getElementById('pen-btn');
     const eraserBtn   = document.getElementById('eraser-btn');
+    const bucketBtn   = document.getElementById('bucket-btn');
     const brushInput  = document.getElementById('brush-size');
+    const brushValueDisplay = document.getElementById('brush-size-value');
     const colorInput  = document.getElementById('color-picker');
     const layerSelect = document.getElementById('layer-select');
     const templateBtn = document.getElementById('template-btn');
     const boundsBtn   = document.getElementById('toggle-bounds');
     const undoBtn     = document.getElementById('undo-btn');
     const downloadBtn = document.getElementById('download-btn');
+
   
-    // --- History management ---
+    // --- History ---
     function snapshot() {
-      // Capture current state of all layers
       const snap = {};
       layerNames.forEach(name => {
         snap[name] = layers[name].getImageData(0, 0, CANVAS_SIZE, CANVAS_SIZE);
@@ -77,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   
     function undo() {
-      if (history.length === 0) return;
+      if (!history.length) return;
       const snap = history.pop();
       layerNames.forEach(name => {
         layers[name].putImageData(snap[name], 0, 0);
@@ -85,57 +90,78 @@ document.addEventListener('DOMContentLoaded', () => {
       redrawCanvas();
     }
   
-    // Bind Undo button and Ctrl+Z
     undoBtn.addEventListener('click', undo);
     window.addEventListener('keydown', e => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
         e.preventDefault();
         undo();
       }
     });
   
-    // --- Tool & UI bindings ---
+    // --- Tool bindings ---
     penBtn.addEventListener('click',    () => { currentTool = 'pen';    redrawCanvas(); });
     eraserBtn.addEventListener('click', () => { currentTool = 'eraser'; redrawCanvas(); });
-    brushInput.addEventListener('input', e => brushSize = +e.target.value);
+    bucketBtn.addEventListener('click', () => { currentTool = 'bucket'; redrawCanvas(); });
+    brushInput.addEventListener('input', e => {
+        brushSize = +e.target.value;
+        brushValueDisplay.textContent = brushSize;
+      });
     colorInput.addEventListener('input', e => brushColor = e.target.value);
-    layerSelect.addEventListener('change', e => { currentLayer = e.target.value; redrawCanvas(); });
-    templateBtn.addEventListener('click', () => { showTemplate = !showTemplate; redrawCanvas(); });
-    boundsBtn.addEventListener('click',   () => { showBounds = !showBounds;   redrawCanvas(); });
+    layerSelect.addEventListener('change', e => {
+      currentLayer = e.target.value;
+      redrawCanvas();
+    });
+    templateBtn.addEventListener('click', () => {
+      showTemplate = !showTemplate;
+      redrawCanvas();
+    });
+    boundsBtn.addEventListener('click', () => {
+      showBounds = !showBounds;
+      redrawCanvas();
+    });
     downloadBtn.addEventListener('click', exportTexture);
   
-    // Capture snapshot at stroke start
-    canvas.addEventListener('mousedown', () => { snapshot(); isDrawing = true; });
+    // Pointer events
+    canvas.addEventListener('mousedown', e => {
+      if (currentTool === 'bucket') {
+        snapshot();
+        handleBucket(e);
+      } else {
+        snapshot();
+        isDrawing = true;
+      }
+    });
     window.addEventListener('mouseup',   () => { isDrawing = false; });
-  
-    // Draw on mousemove
     canvas.addEventListener('mousemove', handleDraw);
   
-    // --- Drawing logic ---
+    // --- Bounds helper ---
     function getBounds(layerName) {
       if (layerName.startsWith('eye-')) {
-        return { x: 64, y: 64, w: 64, h: 64 };
+        return { x: 72, y: 52, w: 64, h: 64 };
       }
-      const [x, y, w, h] = boundsMap[layerName] || [0, 0, CANVAS_SIZE, CANVAS_SIZE];
-      return { x, y, w, h };
+      const def = boundsMap[layerName];
+      if (def) {
+        const [x, y, w, h] = def;
+        return { x, y, w, h };
+      }
+      return { x: 0, y: 0, w: CANVAS_SIZE, h: CANVAS_SIZE };
     }
   
+    // --- Drawing (pen/eraser) ---
     function handleDraw(evt) {
-      if (!isDrawing) return;
+      if (!isDrawing || currentTool === 'bucket') return;
   
       const rect = canvas.getBoundingClientRect();
       const x = (evt.clientX - rect.left) * (canvas.width / rect.width);
       const y = (evt.clientY - rect.top)  * (canvas.height / rect.height);
       const { x: bx, y: by, w: bw, h: bh } = getBounds(currentLayer);
-  
-      // Only draw inside bounds
       if (x < bx || x > bx + bw || y < by || y > by + bh) return;
   
       const ctxLayer = layers[currentLayer];
-      const radius   = brushSize / 2;
+      const r = brushSize / 2;
   
       ctxLayer.beginPath();
-      ctxLayer.arc(x, y, radius, 0, 2 * Math.PI);
+      ctxLayer.arc(x, y, r, 0, 2 * Math.PI);
       if (currentTool === 'eraser') {
         ctxLayer.save();
         ctxLayer.globalCompositeOperation = 'destination-out';
@@ -149,24 +175,96 @@ document.addEventListener('DOMContentLoaded', () => {
       redrawCanvas();
     }
   
+    // --- Bucket fill ---
+    function handleBucket(evt) {
+      const rect = canvas.getBoundingClientRect();
+      const x = Math.floor((evt.clientX - rect.left) * (canvas.width / rect.width));
+      const y = Math.floor((evt.clientY - rect.top)  * (canvas.height / rect.height));
+      const { x: bx, y: by, w: bw, h: bh } = getBounds(currentLayer);
+      if (x < bx || x > bx + bw || y < by || y > by + bh) return;
+  
+      const ctxLayer = layers[currentLayer];
+      floodFill(ctxLayer, x, y, brushColor, bx, by, bw, bh);
+      redrawCanvas();
+    }
+  
+    function floodFill(ctxLayer, startX, startY, fillHex, bx, by, bw, bh) {
+      const img = ctxLayer.getImageData(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+      const data = img.data;
+      const w = img.width, h = img.height;
+      const idx = (startY * w + startX) * 4;
+      const target = data.slice(idx, idx + 4);
+      const fill = hexToRgba(fillHex);
+  
+      // no-op if same
+      if (target[0] === fill[0] && target[1] === fill[1] &&
+          target[2] === fill[2] && target[3] === fill[3]) {
+        return;
+      }
+  
+      const visited = new Uint8Array(w * h);
+      const stack = [[startX, startY]];
+  
+      while (stack.length) {
+        const [cx, cy] = stack.pop();
+        if (cx < bx || cx >= bx + bw || cy < by || cy >= by + bh) continue;
+        const i = cy * w + cx;
+        if (visited[i]) continue;
+        const off = i * 4;
+        if (data[off]   === target[0] &&
+            data[off+1] === target[1] &&
+            data[off+2] === target[2] &&
+            data[off+3] === target[3]) {
+          // fill
+          data[off]   = fill[0];
+          data[off+1] = fill[1];
+          data[off+2] = fill[2];
+          data[off+3] = fill[3];
+          visited[i] = 1;
+
+        stack.push(
+            [cx+1, cy],
+            [cx-1, cy],
+            [cx, cy+1],
+            [cx, cy-1],
+            [cx+1, cy+1],
+            [cx-1, cy+1],
+            [cx+1, cy-1],
+            [cx-1, cy-1]
+          );
+  
+        }
+      }
+  
+      ctxLayer.putImageData(img, 0, 0);
+    }
+  
+    function hexToRgba(hex) {
+      const v = hex.replace('#', '');
+      return [
+        parseInt(v.slice(0,2),16),
+        parseInt(v.slice(2,4),16),
+        parseInt(v.slice(4,6),16),
+        255
+      ];
+    }
+  
+    // --- Redraw editor & preview ---
     function redrawCanvas() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
   
-      // Template underlay
       if (showTemplate && templateImage.complete) {
         ctx.globalAlpha = 0.3;
         ctx.drawImage(templateImage, 0, 0, canvas.width, canvas.height);
         ctx.globalAlpha = 1.0;
       }
   
-      // Draw layers (highlight active)
       layerNames.forEach(name => {
         ctx.globalAlpha = (name === currentLayer ? 1.0 : 0.2);
         ctx.drawImage(layers[name].canvas, 0, 0, canvas.width, canvas.height);
       });
       ctx.globalAlpha = 1.0;
   
-      // Draw bounds if active
       if (showBounds) {
         const b = getBounds(currentLayer);
         ctx.save();
@@ -181,39 +279,54 @@ document.addEventListener('DOMContentLoaded', () => {
         );
         ctx.restore();
       }
+  
       redrawPreview();
     }
-
+  
     function redrawPreview() {
-        // clear preview
         previewCtx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
       
-        // draw in-game layer order:
-        // shadows behind…
+        // 1) All shadows behind
         previewCtx.drawImage(layers['body-shadow'].canvas, 0, 0);
         previewCtx.drawImage(layers['hand-shadow'].canvas, 0, 0);
         previewCtx.drawImage(layers['foot-shadow'].canvas, 0, 0);
       
-        // then body…
+        // 2) Hand behind body
+        previewCtx.drawImage(layers['hand'].canvas, 0, 0);
+      
+        // 3) Back foot (left half of foot region), behind body
+        const fb = getBounds('foot');       // { x:52, y:108, w:128, h:64 }
+        const halfW = fb.w / 2;            // 64
+        previewCtx.drawImage(
+          layers['foot'].canvas,
+          fb.x, fb.y,        halfW, fb.h,  // source: left half
+          fb.x, fb.y,        halfW, fb.h   // dest: same position
+        );
+      
+        // 4) Body
         previewCtx.drawImage(layers['body'].canvas, 0, 0);
       
-        // then foreground parts…
-        previewCtx.drawImage(layers['hand'].canvas, 0, 0);
-        previewCtx.drawImage(layers['foot'].canvas, 0, 0);
-      
-        // finally all eyes (1…6) overlaid
+        // 5) Front foot (right half), in front of body
+        previewCtx.drawImage(
+          layers['foot'].canvas,
+          fb.x + halfW, fb.y, halfW, fb.h,  // source: right half
+          fb.x + halfW, fb.y, halfW, fb.h   // dest
+        );
+    
+        // 6) Eyes on top
         for (let i = 1; i <= 6; i++) {
           previewCtx.drawImage(layers[`eye-${i}`].canvas, 0, 0);
         }
       }
+      
   
     // --- Export ---
     function exportLayer(finalCtx, layerName, dx, dy) {
-      const { x, y, w, h } = getBounds(layerName);
+      const b = getBounds(layerName);
       finalCtx.drawImage(
         layers[layerName].canvas,
-        x, y, w, h,
-        dx, dy, w, h
+        b.x, b.y, b.w, b.h,
+        dx,  dy,  b.w, b.h
       );
     }
   
@@ -235,9 +348,9 @@ document.addEventListener('DOMContentLoaded', () => {
       exportLayer(finalCtx, 'hand',        384,   0);
       exportLayer(finalCtx, 'foot',        384,  64);
   
-      // Eyes (6 variants, right‐to‐left)
+      // Eyes (right-to-left)
       for (let i = 0; i < 6; i++) {
-        exportLayer(finalCtx, `eye-${i + 1}`, 448 - i * 64, 192);
+        exportLayer(finalCtx, `eye-${i+1}`, 448 - i*64, 192);
       }
   
       finalCanvas.toBlob(blob => {

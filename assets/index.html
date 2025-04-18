@@ -12,17 +12,19 @@
   </header>
 
   <main>
+    
+    <!-- Game Preview -->
+    <section id="preview-container">
+        <h2>Game Preview</h2>
+        <canvas id="preview-canvas" width="192" height="192"></canvas>
+     </section>
+
+     
     <!-- Drawing area -->
     <section id="editor-container">
       <!-- internal resolution 192×192, scaled by CSS -->
       <canvas id="editor-canvas" width="192" height="192"></canvas>
     </section>
-
-        <!-- Game Preview -->
-        <section id="preview-container">
-            <h2>Game Preview</h2>
-            <canvas id="preview-canvas" width="192" height="192"></canvas>
-          </section>
 
     <!-- Toolbar -->
     <aside id="toolbar">
@@ -50,13 +52,23 @@
       </div>
 
       <div class="tool-group">
-        <label for="brush-size">Brush Size:</label>
-        <input type="range" id="brush-size" min="1" max="128" value="16" />
+        <label for="brush-size">
+          Brush Size: <span id="brush-size-value">16</span>
+        </label>
+        <input
+          type="range"
+          id="brush-size"
+          min="1"
+          max="128"
+          value="16"
+        />
       </div>
+      
 
       <div class="tool-group">
         <button id="pen-btn">Pen Tool</button>
         <button id="eraser-btn">Eraser Tool</button>
+        <button id="bucket-btn">Bucket</button>
         <button id="undo-btn">Undo</button>
       </div>
 
@@ -69,7 +81,7 @@
   </main>
 
   <footer>
-    <p>Created for the DDRace Network community</p>
+    <p>Desenvolvido com ❤️ para a comunidade do DDrace Network</p>
   </footer>
 
   <script src="/js/script.js"></script>

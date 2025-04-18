@@ -44,24 +44,6 @@ By default, the server runs on port **3001**. Open your browser at:
 
 http://localhost:3001/
 
-
----
-
-## 📁 Project Structure
-
-
-DDnet-Skin-Creator/
-├── App.js             # Express server
-├── package.json       # Node.js metadata
-├── assets/
-│   ├─ index.html      # Main HTML
-│   └─ template.png    # Skin template overlay
-├── css/
-│   └─ styles.css      # Responsive, modern styling
-└── js/
-    └─ script.js       # Full-featured editor & export logic
-
-
 ---
 
 ## 🎨 Usage

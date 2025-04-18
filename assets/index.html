@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -12,18 +13,15 @@
   </header>
 
   <main>
-    
-    <!-- Game Preview -->
-    <section id="preview-container">
-        <h2>Game Preview</h2>
-        <canvas id="preview-canvas" width="192" height="192"></canvas>
-     </section>
-
-     
-    <!-- Drawing area -->
+    <!-- Editor -->
     <section id="editor-container">
-      <!-- internal resolution 192×192, scaled by CSS -->
       <canvas id="editor-canvas" width="192" height="192"></canvas>
+    </section>
+
+    <!-- Preview -->
+    <section id="preview-container">
+      <h2>Game Preview</h2>
+      <canvas id="preview-canvas" width="192" height="192"></canvas>
     </section>
 
     <!-- Toolbar -->
@@ -55,26 +53,22 @@
         <label for="brush-size">
           Brush Size: <span id="brush-size-value">16</span>
         </label>
-        <input
-          type="range"
-          id="brush-size"
-          min="1"
-          max="128"
-          value="16"
-        />
+        <input type="range" id="brush-size" min="1" max="128" value="16" />
       </div>
-      
 
       <div class="tool-group">
         <button id="pen-btn">Pen Tool</button>
         <button id="eraser-btn">Eraser Tool</button>
-        <button id="bucket-btn">Bucket</button>
-        <button id="undo-btn">Undo</button>
+        <button id="bucket-btn">Bucket Tool</button>
       </div>
 
       <div class="tool-group">
         <button id="template-btn">Toggle Template</button>
         <button id="toggle-bounds">Toggle Bounds</button>
+      </div>
+
+      <div class="tool-group">
+        <button id="undo-btn">Undo</button>
         <button id="download-btn">Download Texture</button>
       </div>
     </aside>
@@ -82,6 +76,7 @@
 
   <footer>
     <p>Desenvolvido com ❤️ para a comunidade do DDrace Network</p>
+    <p>https://github.com/ninguemdev/DDnet-Skin-Creator</p>
   </footer>
 
   <script src="/js/script.js"></script>

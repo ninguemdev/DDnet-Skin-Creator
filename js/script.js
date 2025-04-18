@@ -284,40 +284,40 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   
     function redrawPreview() {
-        previewCtx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
-      
-        // 1) All shadows behind
-        previewCtx.drawImage(layers['body-shadow'].canvas, 0, 0);
-        previewCtx.drawImage(layers['hand-shadow'].canvas, 0, 0);
-        previewCtx.drawImage(layers['foot-shadow'].canvas, 0, 0);
-      
-        // 2) Hand behind body
-        previewCtx.drawImage(layers['hand'].canvas, 0, 0);
-      
-        // 3) Back foot (left half of foot region), behind body
-        const fb = getBounds('foot');       // { x:52, y:108, w:128, h:64 }
-        const halfW = fb.w / 2;            // 64
-        previewCtx.drawImage(
-          layers['foot'].canvas,
-          fb.x, fb.y,        halfW, fb.h,  // source: left half
-          fb.x, fb.y,        halfW, fb.h   // dest: same position
-        );
-      
-        // 4) Body
-        previewCtx.drawImage(layers['body'].canvas, 0, 0);
-      
-        // 5) Front foot (right half), in front of body
-        previewCtx.drawImage(
-          layers['foot'].canvas,
-          fb.x + halfW, fb.y, halfW, fb.h,  // source: right half
-          fb.x + halfW, fb.y, halfW, fb.h   // dest
-        );
+      // limpa preview
+      previewCtx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
     
-        // 6) Eyes on top
-        for (let i = 1; i <= 6; i++) {
-          previewCtx.drawImage(layers[`eye-${i}`].canvas, 0, 0);
-        }
+      // 1) sombras atrás de tudo
+      previewCtx.drawImage(layers['body-shadow'].canvas,      0, 0);
+      previewCtx.drawImage(layers['hand-shadow'].canvas,      0, 0);
+      previewCtx.drawImage(layers['foot-shadow'].canvas,      0, 0);
+    
+      // 2) mão atrás do corpo
+      previewCtx.drawImage(layers['hand'].canvas,             0, 0);
+    
+      // 3) pé de trás (back foot) inteiro atrás do corpo
+      const fb = getBounds('foot'); // { x, y, w, h }
+      previewCtx.drawImage(
+        layers['foot'].canvas,
+        fb.x, fb.y, fb.w, fb.h,      // região fonte
+        fb.x, fb.y, fb.w, fb.h       // mesma posição na preview
+      );
+    
+      // 4) corpo
+      previewCtx.drawImage(layers['body'].canvas,             0, 0);
+    
+      // 5) pé da frente (front foot) inteiro na frente do corpo
+      previewCtx.drawImage(
+        layers['foot'].canvas,
+        fb.x, fb.y, fb.w, fb.h,
+        fb.x, fb.y, fb.w, fb.h
+      );
+    
+      // 6) olhos por cima de tudo
+      for (let i = 1; i <= 6; i++) {
+        previewCtx.drawImage(layers[`eye-${i}`].canvas, 0, 0);
       }
+    }
       
   
     // --- Export ---
